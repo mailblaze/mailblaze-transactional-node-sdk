@@ -1,0 +1,57 @@
+{
+  "name": "@mailblaze/transactional",
+  "version": "0.1.0",
+  "description": "Official Node.js client for the Mail Blaze transactional email API.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": "^22.14.0 || ^24.0.0 || ^26.0.0"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "docs/openapi.yaml",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "SECURITY.md"
+  ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mailblaze/mailblaze-transactional-node-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mailblaze/mailblaze-transactional-node-sdk/issues"
+  },
+  "homepage": "https://github.com/mailblaze/mailblaze-transactional-node-sdk#readme",
+  "keywords": [
+    "mailblaze",
+    "email",
+    "transactional"
+  ],
+  "author": "Mail Blaze <support@mailblaze.com>",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "test": "node --experimental-strip-types --test test/message.test.ts test/limits.test.ts test/client.test.ts test/read.test.ts test/security.test.ts test/compat.test.ts test/helpers.test.ts test/live.test.ts",
+    "test:consumer": "node scripts/consumer-test.mjs",
+    "prepack": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "typescript": "7.0.2"
+  }
+}
