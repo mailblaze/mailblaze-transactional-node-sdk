@@ -77,8 +77,6 @@ await mailblaze.send({
 
 `cc` and `bcc` are sent as one string. You can pass a string or a list of addresses. The list is joined with commas.
 
-> **Known API limitation:** PHP SDK live checks on 17 Nov 2026 found that the Mail Blaze API does not apply `cc` or `replyTo` to the delivered message. `bcc` was delivered, and those addresses were not shown to the other recipients. This package sends the same fields. It has not repeated that live check.
-
 A `Date` in `sendAt` is sent in UTC as RFC 3339 with `+00:00` and whole seconds (for example `2026-11-17T09:00:00+00:00`). A string is sent unchanged. A string with no offset is interpreted in the customer account timezone. An invalid value returns `150.006`.
 
 Names, subjects, categories, template ids, filenames, and addresses are trimmed of leading and trailing ASCII whitespace and NUL. A value that still contains a line break (including U+0085, U+2028, and U+2029) or another control character (C0 or C1) is rejected. The library does not strip those characters and continue. Email addresses may be up to 320 characters. IP-literal domains are allowed. Numeric TLDs and dotless domains are rejected. Commas, semicolons, and angle brackets are rejected, even inside quotes. Filenames must not include a path, hidden or formatting characters, or more than 255 bytes. The `html` empty check uses the same trim set, so `html` that is only ASCII whitespace is rejected.
