@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2026-11-25
+
+### Fixed
+
+- `attachments()` returns a zero-byte file with empty `data`. Before, a file with empty `data` made the whole call throw `ApiError`.
+- `VERSION`, `MailBlaze.VERSION`, and the `User-Agent` header report the package version. A test now fails when `VERSION` and `package.json` differ.
+
+### Security
+
+- Merge tag string values that contain a line break (CR, LF, U+0085, U+2028, U+2029) or another C0 or C1 control character, including tab, throw `ValidationError` before the request, the same rules as header fields.
+
 ## [0.1.1] - 2026-11-25
 
 ### Fixed
@@ -50,5 +61,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI actions are pinned to commit SHAs, workflows run with read-only tokens and no persisted checkout credentials, Dependabot watches actions and npm, and a CodeQL workflow is added.
 - Releases publish from Node 24 with npm trusted publishing (OIDC) through the protected `npm-publish` environment, after `npm audit --audit-level=high` and a check that npm is 11.5.1 or later. No npm token secret is used.
 
+[0.1.2]: https://github.com/mailblaze/mailblaze-transactional-node-sdk/releases/tag/v0.1.2
 [0.1.1]: https://github.com/mailblaze/mailblaze-transactional-node-sdk/releases/tag/v0.1.1
 [0.1.0]: https://github.com/mailblaze/mailblaze-transactional-node-sdk/releases/tag/v0.1.0

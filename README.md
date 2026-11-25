@@ -2,7 +2,7 @@
 
 `@mailblaze/transactional` is the official Node.js client for the Mail Blaze transactional API. You pass strings and file bytes. The library sends the JSON the API expects.
 
-Version 0.1.0 is a public preview.
+This package is a public preview.
 
 ## Requirements
 
@@ -57,7 +57,7 @@ const sent = await mailblaze.send({
 });
 ```
 
-Merge tag names must match `[A-Z0-9_]`. `MAILBLAZE_PREHEADER` sets the preheader. A missing tag returns `150.014`. An unknown template returns `150.013`.
+Merge tag names must match `[A-Z0-9_]`. `MAILBLAZE_PREHEADER` sets the preheader. A template can place a tag in a single-line field such as the subject, so a string value that contains a line break (including U+0085, U+2028, and U+2029) or another control character (C0 or C1, including tab) throws `ValidationError` before the request. Values are not trimmed. For a line break in the body, put it in the template or pass HTML such as `<br>`. A missing tag returns `150.014`. An unknown template returns `150.013`.
 
 ## Attachments, copies, and scheduling
 
@@ -100,7 +100,7 @@ const record = await mailblaze.get(emailUid);
 const when = sendAtDateTime(record, 'Asia/Manila'); // Date | null
 ```
 
-`attachments` returns each file's name and decoded bytes. The `name` is supplied by the server and is not sanitised. It may contain path separators, `..`, control characters, or reserved device names. Sanitise it, or generate your own filename, before writing a file to disk.
+`attachments` returns each file's name and decoded bytes. A zero-byte file has empty `data`. The `name` is supplied by the server and is not sanitised. It may contain path separators, `..`, control characters, or reserved device names. Sanitise it, or generate your own filename, before writing a file to disk.
 
 Page counts in a list response (`count`, `totalPages`, `currentPage`, `nextPage`, `prevPage`) must be non-negative safe integers or `null`. Anything else is an `ApiError` that names the field.
 

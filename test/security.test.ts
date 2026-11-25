@@ -219,6 +219,47 @@ test('line separators and bidi controls are removed from server error text', () 
   assert.equal(error.error, 'a b cdefgh');
 });
 
+test('merge tag values with line breaks or control characters are rejected before the request', async () => {
+  const template = { to: base.to, from: base.from, subject: base.subject, templateId: 't1' };
+  let calls = 0;
+  const client = new MailBlaze({
+    apiKey: KEY,
+    fetch: () => {
+      calls += 1;
+      return Promise.resolve(ok201());
+    },
+  });
+  const cases: Array<[string, RegExp]> = [
+    ['Acme\r\nBcc: evil@example.com', /^Merge tag value must not contain line breaks$/],
+    ['a\rb', /^Merge tag value must not contain line breaks$/],
+    ['a\nb', /^Merge tag value must not contain line breaks$/],
+    ['a\u0085b', /^Merge tag value must not contain line breaks$/],
+    ['a\u2028b', /^Merge tag value must not contain line breaks$/],
+    ['a\u2029b', /^Merge tag value must not contain line breaks$/],
+    ['a\tb', /^Merge tag value must not contain control characters$/],
+    ['a\u0000b', /^Merge tag value must not contain control characters$/],
+    ['a\u001bb', /^Merge tag value must not contain control characters$/],
+    ['a\u009bb', /^Merge tag value must not contain control characters$/],
+  ];
+  for (const [value, message] of cases) {
+    await assert.rejects(
+      () => Promise.resolve().then(() => client.send({ ...template, mergeTags: { COMPANY_NAME: value } })),
+      (error: unknown) => error instanceof ValidationError && message.test(error.message),
+      JSON.stringify(value),
+    );
+  }
+  assert.equal(calls, 0);
+});
+
+test('merge tag values keep spaces, unicode, and scalar conversions', () => {
+  const template = { to: base.to, from: base.from, subject: base.subject, templateId: 't1' };
+  const wire = buildMessage({
+    ...template,
+    mergeTags: { NAME: '  Zoë 日本語 🎉\u200d ', EMPTY: '', NUM: 1001, FLAG: false, NONE: null },
+  });
+  assert.deepEqual(wire.merge_tags, { NAME: '  Zoë 日本語 🎉\u200d ', EMPTY: '', NUM: '1001', FLAG: '0', NONE: '' });
+});
+
 test('merge tag values count toward the 15 MiB total', () => {
   const template = { to: base.to, from: base.from, subject: base.subject, templateId: 't1' };
   assert.throws(
@@ -239,9 +280,9 @@ test('merge tag values count toward the 15 MiB total', () => {
 
 test('merge tags are counted JSON-encoded, so escaped characters count at their wire size', () => {
   const template = { to: base.to, from: base.from, subject: base.subject, templateId: 't1' };
-  // 3 MiB of U+0001 is 18 MiB as JSON (\u0001); 10 MiB of '"' is 20 MiB as JSON (\").
+  // 10 MiB of backslashes or quotes is 20 MiB as JSON. Control characters are rejected before counting.
   for (const [label, value] of [
-    ['U+0001', '\u0001'.repeat(3 * 1024 * 1024)],
+    ['backslash', '\\'.repeat(10 * 1024 * 1024)],
     ['quote', '"'.repeat(10 * 1024 * 1024)],
   ] as const) {
     assert.throws(

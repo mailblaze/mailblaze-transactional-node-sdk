@@ -92,7 +92,8 @@ export function parseAttachments(payload: unknown): StoredAttachment[] {
     const name = requiredString(file['name'], 'name');
     let data: Uint8Array;
     try {
-      data = strictDecodeBase64(requiredString(file['data'], 'data'), 'Attachment data');
+      // An empty string is a zero-byte file and decodes to an empty Uint8Array.
+      data = strictDecodeBase64(text(file['data'], 'data'), 'Attachment data');
     } catch (error) {
       if (error instanceof ValidationError) {
         throw new ApiError('The Mail Blaze API returned attachment data that is not strict base64');

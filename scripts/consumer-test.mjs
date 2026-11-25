@@ -1,16 +1,20 @@
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const root = fileUrl(new URL('..', import.meta.url));
 const packed = JSON.parse(runNpm(['pack', '--json', '--silent'], { cwd: root, encoding: 'utf8' }));
 const tarball = join(root, packed[0].filename);
+const version = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).version;
 
 try {
   await smoke('module', 'smoke.mjs', `
-    import { MailBlaze, attachmentFromPath, sendAtDateTime } from '@mailblaze/transactional';
+    import { MailBlaze, VERSION, attachmentFromPath, sendAtDateTime } from '@mailblaze/transactional';
     const client = new MailBlaze({ apiKey: 'mb-consumer-key' });
+    if (VERSION !== '${version}' || MailBlaze.VERSION !== '${version}') {
+      throw new Error('ESM consumer reported VERSION ' + VERSION + ', expected ${version}');
+    }
     if (typeof client.send !== 'function' || typeof client.list !== 'function') {
       throw new Error('ESM consumer did not receive the client methods');
     }
@@ -34,8 +38,11 @@ try {
     console.log('esm ok');
   `);
   await smoke(undefined, 'smoke.cjs', `
-    const { MailBlaze, attachmentFromPath, sendAtDateTime } = require('@mailblaze/transactional');
+    const { MailBlaze, VERSION, attachmentFromPath, sendAtDateTime } = require('@mailblaze/transactional');
     const client = new MailBlaze({ apiKey: 'mb-consumer-key' });
+    if (VERSION !== '${version}' || MailBlaze.VERSION !== '${version}') {
+      throw new Error('CJS consumer reported VERSION ' + VERSION + ', expected ${version}');
+    }
     if (typeof client.send !== 'function' || typeof client.get !== 'function') {
       throw new Error('CJS consumer did not receive the client methods');
     }

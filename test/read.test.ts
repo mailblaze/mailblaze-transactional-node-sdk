@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { MailBlaze } from '../src/index.ts';
+import { ApiError, MailBlaze } from '../src/index.ts';
 
 const KEY = 'mb-test-key';
 
@@ -47,6 +47,43 @@ test('get and attachments keep ids opaque and return file bytes', async () => {
   const files = await client.attachments('email_001');
   assert.equal(files[0]?.name, 'note.txt');
   assert.equal(Buffer.from(files[0]?.data ?? new Uint8Array()).toString('utf8'), 'hello');
+});
+
+test('attachments returns a zero-byte file alongside the others', async () => {
+  const client = new MailBlaze({
+    apiKey: KEY,
+    fetch: () =>
+      Promise.resolve(Response.json({
+        status: 'success',
+        code: '000.000',
+        data: [
+          { name: 'note.txt', data: Buffer.from('hello').toString('base64') },
+          { name: 'empty.bin', data: '' },
+          { name: 'tail.txt', data: Buffer.from('end').toString('base64') },
+        ],
+      })),
+  });
+
+  const files = await client.attachments('email_001');
+  assert.deepEqual(files.map((file) => file.name), ['note.txt', 'empty.bin', 'tail.txt']);
+  assert.ok(files[1]?.data instanceof Uint8Array);
+  assert.equal(files[1]?.data.byteLength, 0);
+  assert.equal(Buffer.from(files[2]?.data ?? new Uint8Array()).toString('utf8'), 'end');
+});
+
+test('attachments still rejects data that is not a string or not strict base64', async () => {
+  for (const data of [null, 123, 'aGVsbG8', 'aGVs\nbG8=']) {
+    const client = new MailBlaze({
+      apiKey: KEY,
+      fetch: () =>
+        Promise.resolve(Response.json({
+          status: 'success',
+          code: '000.000',
+          data: [{ name: 'ok.txt', data: 'b2s=' }, { name: 'bad.bin', data }],
+        })),
+    });
+    await assert.rejects(() => client.attachments('email_001'), ApiError, String(data));
+  }
 });
 
 test('a numeric id is not coerced', async () => {

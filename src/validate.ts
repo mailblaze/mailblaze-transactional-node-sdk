@@ -145,6 +145,14 @@ export function assertEmailUid(emailUid: string): string {
 export function mergeTagValue(value: string | number | boolean | null): string {
   if (typeof value === 'string') {
     assertUtf8(value, 'Merge tag value');
+    // A template can place a tag in a single-line field such as the subject, so values follow
+    // the header rules for line breaks and control characters. Values are not trimmed.
+    if (LINE_BREAK.test(value)) {
+      throw new ValidationError('Merge tag value must not contain line breaks');
+    }
+    if (CONTROL.test(value)) {
+      throw new ValidationError('Merge tag value must not contain control characters');
+    }
 
     return value;
   }
