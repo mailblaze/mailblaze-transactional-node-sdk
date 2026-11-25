@@ -1,6 +1,6 @@
 {
   "name": "@mailblaze/transactional",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Official Node.js client for the Mail Blaze transactional email API.",
   "type": "module",
   "license": "MIT",

@@ -1,5 +1,5 @@
 /** Keep in step with package.json. test/version.test.ts fails when they differ. */
-export const VERSION = '0.1.2';
+export const VERSION = '0.1.3';
 
 export const DEFAULT_BASE_URL = 'https://control.mailblaze.com/api';
 

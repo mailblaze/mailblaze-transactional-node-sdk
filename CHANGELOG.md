@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2026-11-25
+
+### Changed
+
+- Published from GitHub Actions with npm provenance attestations. No functional changes.
+
 ## [0.1.2] - 2026-11-25
 
 ### Fixed
@@ -61,6 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI actions are pinned to commit SHAs, workflows run with read-only tokens and no persisted checkout credentials, Dependabot watches actions and npm, and a CodeQL workflow is added.
 - Releases publish from Node 24 with npm trusted publishing (OIDC) through the protected `npm-publish` environment, after `npm audit --audit-level=high` and a check that npm is 11.5.1 or later. No npm token secret is used.
 
+[0.1.3]: https://github.com/mailblaze/mailblaze-transactional-node-sdk/releases/tag/v0.1.3
 [0.1.2]: https://github.com/mailblaze/mailblaze-transactional-node-sdk/releases/tag/v0.1.2
 [0.1.1]: https://github.com/mailblaze/mailblaze-transactional-node-sdk/releases/tag/v0.1.1
 [0.1.0]: https://github.com/mailblaze/mailblaze-transactional-node-sdk/releases/tag/v0.1.0
